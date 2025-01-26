@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "board.h"
-
+#include "game.h"
 
 Difficulty choose_difficulty() {
     int lvl;
@@ -13,16 +13,19 @@ Difficulty choose_difficulty() {
         level.r = 9;
         level.c = 9;
         level.mines = 10;
+        level.multiplier = 1;
         return level;
     }else if(lvl == 2) {
         level.r = 16;
         level.c = 16;
         level.mines = 40;
+        level.multiplier = 2;
         return level;
     }else if(lvl == 3) {
         level.r = 16;
         level.c = 30;
         level.mines = 99;
+        level.multiplier = 3;
         return level;
     }else if(lvl == 4) {
         printf("Podaj liczbe wierszy: ");
@@ -31,11 +34,12 @@ Difficulty choose_difficulty() {
         scanf("%d", &level.c);
         printf("Podaj liczbe min: ");
         scanf("%d", &level.mines);
+        level.multiplier = 1;
         return level;
     }
 }
 
-Field **generate_board(int r, int c, int mines) {
+Field **generate_board(int r, int c) {
     Field **board;
     board = malloc(r * sizeof(Field*));
     int i;
@@ -50,11 +54,17 @@ Field **generate_board(int r, int c, int mines) {
             board[i][j].number = 0;
         }
     }
+    return board;
+}
+
+void generate_mines(Field **board, int r, int c, int mines, int start_x, int start_y) {
+    int i;
+    int j;
     int count = 0;
     while(count < mines) {
         int a = rand() % r;
         int b = rand() % c;
-        if(board[a][b].isbomb != 1) {
+        if(board[a][b].isbomb != 1 && (a != start_x || b != start_y)) {
             board[a][b].isbomb = 1;
             count++;
         }
@@ -89,30 +99,54 @@ Field **generate_board(int r, int c, int mines) {
             }
         }
     }
-    return board;
 }
 
-void print_board(Field **board, int r, int c) {
+void print_board(Field **board, int r, int c, int points, int flags, int isfinished) {
     int i;
     int j;
+    printf("    ");
+    for(i = 0; i < c; i++) {
+        printf("|%2d ", i + 1);
+    }
+    printf("|\n");
+    printf("+---");
     for(i = 0; i < r; i++) {
-        for(j = 0; j < c; j++) {
+        for(j = 0; j <= c; j++) {
             printf("+---");
         }
         printf("+\n");
+        printf(" %2d ", i + 1);
         for(j = 0; j < c; j++) {
-            if(board[i][j].isflag == 1) {
+            if(board[i][j].isbomb == 1 && isfinished == 1){
+                printf("|\e[0;31m * \e[0m");
+            }else if(board[i][j].isread == 1 && isfinished == 0) {
+                if(board[i][j].number == 0) {
+                    printf("|   ");
+                }else{
+                    printf("| \e[%sm%d\e[0m ", 
+                        board[i][j].number == 1 ? "0;34" : 
+                        board[i][j].number == 2 ? "0;32" : 
+                        board[i][j].number == 3 ? "0;31" :  
+                        board[i][j].number == 4 ? "0;35" : 
+                        board[i][j].number == 5 ? "0;33" :  
+                        board[i][j].number == 6 ? "0;36" :  
+                        board[i][j].number == 7 ? "0;30" :  
+                        "0;37",
+                        board[i][j].number);
+                }
+            }else if(board[i][j].isflag == 1) {
                 printf("|\e[0;31m F \e[0m");
-            }else if(board[i][j].isread == 1) {
-                printf("| %d ", board[i][j].number);
-            }else if(board[i][j].isread == 0) {
+            }else if(board[i][j].isread == 0 && isfinished == 0) {
+                printf("|###");
+            }else{
                 printf("|   ");
             }
         }
         printf("|\n");
     }
-    for(j = 0; j < c; j++) {
+    for(j = 0; j <= c; j++) {
         printf("+---");
     }
     printf("+\n");
+    printf("\nTwoj wynik: %d        Pozostale flagi: %d\n", points, flags);
 }

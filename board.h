@@ -12,11 +12,13 @@ typedef struct {
     int r;
     int c;
     int mines;
+    int multiplier;
 } Difficulty;
 
 Difficulty choose_difficulty();
-Field **generate_board(int r, int c, int mines);
-void print_board(Field **board, int r, int c);
+Field **generate_board(int r, int c);
+void generate_mines(Field **board, int r, int c, int mines, int start_x, int start_y);
+void print_board(Field **board, int r, int c, int points, int flags, int isfinished);
 
 #endif
 

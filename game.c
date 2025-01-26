@@ -15,59 +15,72 @@ int are_all_read(Field **board, int r, int c) {
     return 1;
 }
 
-void read_neighbors(Field **board, int r, int c, int x, int y) {
+void read_fields(Field **board, int r, int c, int x, int y, int mode, int *points) {
     if(x < 0 || x >= r || y < 0 || y >= c) {
         return;
     }
 
-    if(board[x][y].isread == 1) {
+    if(board[x][y].isread == 1 || board[x][y].isbomb == 1){
         return;
     }
 
     board[x][y].isread = 1;
+    (*points)++;
 
-    if (board[x][y].number == 0) {
-        read_neighbors(board, r, c, x - 1, y - 1);  
-        read_neighbors(board, r, c, x - 1, y);      
-        read_neighbors(board, r, c, x - 1, y + 1);  
-        read_neighbors(board, r, c, x, y - 1);      
-        read_neighbors(board, r, c, x, y + 1);   
-        read_neighbors(board, r, c, x + 1, y - 1); 
-        read_neighbors(board, r, c, x + 1, y);     
-        read_neighbors(board, r, c, x + 1, y + 1);  
+
+    if (board[x][y].number == 0 || mode == 0) {
+        read_fields(board, r, c, x - 1, y - 1, 1, points);  
+        read_fields(board, r, c, x - 1, y, 1, points);      
+        read_fields(board, r, c, x - 1, y + 1, 1, points);  
+        read_fields(board, r, c, x, y - 1, 1, points);      
+        read_fields(board, r, c, x, y + 1, 1, points);   
+        read_fields(board, r, c, x + 1, y - 1, 1, points); 
+        read_fields(board, r, c, x + 1, y, 1, points);     
+        read_fields(board, r, c, x + 1, y + 1, 1, points);  
     }
 }
 
-int read_fields(Field **board, int r, int c) {
+int game(Field **board, int r, int c, int mines, int *points, int multiplier) {
     char com;
     int x;
     int y;
+    int flags = mines;
+    system("cls");
+    print_board(board, r, c, *points, flags, 0);
     while(are_all_read(board, r, c) == 0) {
         scanf(" %c %d %d", &com, &x, &y);
-        if(x-1 >= 0 && y-1 >= 0) {
+        if(x-1 >= 0 && y-1 >= 0 && x <= r && y <= c) {
             if(com == 'f') {
-                if(board[x-1][y-1].isflag == 0) {
+                if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isread == 0 && flags > 0) {
                     board[x-1][y-1].isflag = 1;
-                }else{
+                    flags--;
+                }else if(board[x-1][y-1].isflag == 1){
                     board[x-1][y-1].isflag = 0;
+                    flags++;
                 }
             }else if(com == 'r') {
-                if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isbomb == 1) {
-                    printf("Porazka! Trafiles na mine!\n");
-                    return 0;
-                }else if(board[x-1][y-1].isread == 0 && board[x-1][y-1].isflag == 0) {
-                    board[x-1][y-1].isread = 1;
-                    if(board[x-1][y-1].number == 0) {
-                        read_neighbors(board, r, c, x-1, y-1);
+                if(*points == 0){
+                    generate_mines(board, r, c, mines, x-1, y-1);
+                    read_fields(board, r, c, x-1, y-1, 0, points);
+                }else{
+                    if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isbomb == 1) {
+                        print_board(board, r, c, *points * multiplier, flags, 1);
+                        return 0;
+                    }else if(board[x-1][y-1].isread == 0 && board[x-1][y-1].isflag == 0) {
+                        read_fields(board, r, c, x-1, y-1, 1, points);
                     }
                 }
             }else{
                 printf("Niepoprawna komenda! Dopuszczalne sa: f <x> <y> lub r <x> <y>\n");
+                Sleep(2000);
             }
+        }else{
+            printf("Wspolrzedne poza plansza!\n");
+            Sleep(2000);
         }
         system("cls");
-        print_board(board, r, c);
+        print_board(board, r, c, *points * multiplier, flags, 0);
     }
-    printf("Wygrana! Znalazles wszystkie miny\n");
+    print_board(board, r, c, *points * multiplier, flags, 1);
     return 1;
 }

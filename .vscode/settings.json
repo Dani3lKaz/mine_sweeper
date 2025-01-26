@@ -4,6 +4,8 @@
         "board.h": "c",
         "game.h": "c",
         "windows.h": "c",
-        "test": "cpp"
+        "test": "cpp",
+        "stdio.h": "c",
+        "results.h": "c"
     }
 }

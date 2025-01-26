@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "board.h"
 #include "game.h"
 
@@ -109,7 +110,6 @@ void print_board(Field **board, int r, int c, int points, int flags, int isfinis
         printf("|%2d ", i + 1);
     }
     printf("|\n");
-    printf("+---");
     for(i = 0; i < r; i++) {
         for(j = 0; j <= c; j++) {
             printf("+---");
@@ -150,3 +150,63 @@ void print_board(Field **board, int r, int c, int points, int flags, int isfinis
     printf("+\n");
     printf("\nTwoj wynik: %d        Pozostale flagi: %d\n", points, flags);
 }
+
+Field **load_board(const char *filename, int *r, int *c, int *mines) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        fprintf(stderr, "Nie można otworzyć pliku %s\n", filename);
+        return NULL;
+    }
+
+    char ch;
+    int temp_c = 0;
+
+    while ((ch = getc(file)) != EOF) {
+        if (ch == '*') {
+            (*mines)++;
+        } else if (ch >= '0' && ch <= '8') {
+        } else if (ch == '\n') {
+            if (*r == 0) {
+                *c = temp_c;
+            }
+            (*r)++;
+            temp_c = 0;
+        } else if (ch == ' ') {
+            continue;
+        }else if (ch == 'r' || ch == 'f') {
+            break;
+        }else {
+            fprintf(stderr, "Nieprawidłowy znak '%c' w pliku\n", ch);
+            fclose(file);
+            return NULL;
+        }
+        temp_c++;
+    }
+
+    Field **board = generate_board(*r, *c);
+    rewind(file);
+
+    int row = 0, col = 0;
+    while ((ch = getc(file)) != EOF) {
+        if (ch == '*') {
+            board[row][col].isbomb = 1;
+            col++;
+        } else if (ch >= '0' && ch <= '8') {
+            board[row][col].isbomb = 0;
+            board[row][col].number = ch - '0';
+            col++;
+        } else if (ch == '\n') {
+            row++;
+            col = 0;
+        } else if (ch == ' ') {
+            continue;
+        }else{
+            break;
+        }
+    }
+
+    print_board(board, *r, *c, 0, 0, 0);
+    fclose(file);
+    return board;
+}
+

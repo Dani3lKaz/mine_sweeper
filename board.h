@@ -19,6 +19,7 @@ Difficulty choose_difficulty();
 Field **generate_board(int r, int c);
 void generate_mines(Field **board, int r, int c, int mines, int start_x, int start_y);
 void print_board(Field **board, int r, int c, int points, int flags, int isfinished);
+Field **load_board(const char *filename, int *r, int *c, int *mines);
 
 #endif
 

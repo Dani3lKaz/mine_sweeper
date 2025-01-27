@@ -2,6 +2,7 @@
 #define _GAME_H_
 #include "board.h"
 
+void w(int sec);
 int are_all_read(Field **board, int r, int c);
 void read_fields(Field **board, int r, int c, int x, int y, int mode, int *points);
 int execute_commands(Field **board, int r, int c, int mines, int *points, int multiplier);

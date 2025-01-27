@@ -3,14 +3,17 @@
 #include <string.h>
 #include "results.h"
 
+//Funkcja porównująca wyniki (do qsort)
 int compare_results(const void *a, const void *b){
     Player *ca = (Player *)a;
     Player *cb = (Player *)b;
     return cb->points - ca->points;
 }
 
+//Funkcja wczytująca dotychczasowe wyniki z pliku
 int load_result(const char *filename, Player players[]) {
     FILE *player_list = fopen(filename, "r");
+    //Jeśli podany plik nie istnieje to zwraca 0
     if(player_list == NULL) {
         return 0;
     }
@@ -28,6 +31,7 @@ int load_result(const char *filename, Player players[]) {
     return count;
 }
 
+//Dodanie nowego wyniku jeżeli kwalifikuje się do TOP 5
 void add_new_result(Player players[], int *count, const char *name, int points) {
     
     if(*count < 5) {
@@ -46,6 +50,7 @@ void add_new_result(Player players[], int *count, const char *name, int points) 
     }
 }
 
+//Zapisanie odświeżonej listy w pliku (nadpisanie obecnego lub utworzenie nowego)
 void save_results(const char *filename, Player players[], int count) {
     FILE *player_list = fopen(filename, "w");
     if(player_list == NULL) {

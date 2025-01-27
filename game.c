@@ -135,8 +135,7 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
 
     //Odczytywanie komend
     while (fscanf(file, " %c %d %d", &com, &x, &y) == 3) {
-        w(2);
-        printf("Odczytana komenda %c %d %d\n", com, x, y);
+        w(1);
         if(x-1 >= 0 && y-1 >= 0 && x <= r && y <= c) {
             if(com == 'f') {
                 if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isread == 0 && flags > 0) {
@@ -171,6 +170,7 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
     fclose(file);
 
     if(are_all_read(board, r, c) == 1) {
+        clear();
         print_board(board, r, c, *points, flags, 1);
         printf("Wygrana! Liczba poprawnych krokow: %d\n", steps);
     }

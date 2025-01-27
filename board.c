@@ -16,19 +16,16 @@ Difficulty choose_difficulty() {
         level.c = 9;        //Liczba kolumn
         level.mines = 10;       //Liczby min
         level.multiplier = 1;       //Mnożnik
-        return level;
     }else if(lvl == 2) {
         level.r = 16;
         level.c = 16;
         level.mines = 40;
         level.multiplier = 2;
-        return level;
     }else if(lvl == 3) {
         level.r = 16;
         level.c = 30;
         level.mines = 99;
         level.multiplier = 3;
-        return level;
     }else if(lvl == 4) {
         printf("Podaj liczbe wierszy: ");
         scanf("%d", &level.r);
@@ -37,8 +34,8 @@ Difficulty choose_difficulty() {
         printf("Podaj liczbe min: ");
         scanf("%d", &level.mines);
         level.multiplier = 1;
-        return level;
     }
+    return level;
 }
 
 //Funkcja generująca planszę (bez min)
@@ -162,7 +159,7 @@ void print_board(Field **board, int r, int c, int points, int flags, int isfinis
 Field **load_board(const char *filename, int *r, int *c, int *mines) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        fprintf(stderr, "Nie można otworzyć pliku %s\n", filename);
+        fprintf(stderr, "Nie udalo sie otworzyc pliku %s\n", filename);
         return NULL;
     }
 

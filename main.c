@@ -34,8 +34,8 @@ int main(int argc, char **argv) {
         int points = 0;
         Field **board;
 
-        board = load_board(argv[2], &r, &c, &mines);
-        execute_commands_from_file(argv[2], board, r, c, &points, mines);
+        board = load_board(filename, &r, &c, &mines);
+        execute_commands_from_file(filename, board, r, c, &points, mines);
 
         free_board(board, r);
     }else{
@@ -83,9 +83,9 @@ int main(int argc, char **argv) {
 
 
         printf("Podaj swoja nazwe: ");
-        scanf("%49s", &name);
+        scanf("%49s", name);
         add_new_result(players, &player_count, name, points);
-        save_results(argv[1], players, player_count);
+        save_result(argv[1], players, player_count);
 
         //Wypisanie 5 najlepszych graczy
         printf("TOP 5 najlepszych graczy:\n");

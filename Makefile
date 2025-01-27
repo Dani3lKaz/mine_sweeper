@@ -2,11 +2,17 @@ TARGET = Minesweeper
 
 CFLAGS = -Wall
 
-
+ifeq ($(OS),Windows_NT)
+    RM = del /f /q
+    EXE = .exe
+else
+    RM = rm -f
+    EXE =
+endif
 
 all: $(TARGET)
 
-$(TARGET): main.0 board.o game.o results.o
+$(TARGET): main.o board.o game.o results.o
 	gcc $(CFLAGS) main.o board.o game.o results.o -o $(TARGET)
 
 main.o: main.c
@@ -22,4 +28,4 @@ results.o: main.c
 	gcc $(CFLAGS) -c results.c
 
 clean:
-	rm -f main.c board.c game.c results.c $(TARGET)
+	$(RM) main.o game.o board.o results.o $(TARGET)$(EXE)

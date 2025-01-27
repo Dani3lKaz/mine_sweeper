@@ -51,7 +51,7 @@ void add_new_result(Player players[], int *count, const char *name, int points) 
 }
 
 //Zapisanie odświeżonej listy w pliku (nadpisanie obecnego lub utworzenie nowego)
-void save_results(const char *filename, Player players[], int count) {
+void save_result(const char *filename, Player players[], int count) {
     FILE *player_list = fopen(filename, "w");
     if(player_list == NULL) {
         printf("Nie udalo sie otworzyc pliku do zapisu!\n");

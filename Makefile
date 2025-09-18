@@ -1,31 +1,35 @@
+# Nazwa programu
 TARGET = Minesweeper
 
-CFLAGS = -Wall
+# Kompilator i flagi
+CC = gcc
+CFLAGS = -Wall -Iinclude
 
-ifeq ($(OS),Windows_NT)
-    RM = del /f /q
-    EXE = .exe
-else
-    RM = rm -f
-    EXE =
-endif
+# Katalogi
+SRC_DIR = src
+BUILD_DIR = build
 
+# Pliki źródłowe i obiektowe
+SRC = $(wildcard $(SRC_DIR)/*.c)
+OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC))
+
+# Domyślny cel
 all: $(TARGET)
 
-$(TARGET): main.o board.o game.o results.o
-	gcc $(CFLAGS) main.o board.o game.o results.o -o $(TARGET)
+# Linkowanie
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 
-main.o: main.c
-	gcc $(CFLAGS) -c main.c
+# Kompilacja plików .c do .o (pattern rule)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-board.o: main.c
-	gcc $(CFLAGS) -c board.c
+# Tworzenie katalogu build (jeśli nie istnieje)
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
-game.o: main.c
-	gcc $(CFLAGS) -c game.c
-
-results.o: main.c
-	gcc $(CFLAGS) -c results.c
-
+# Czyszczenie
 clean:
-	$(RM) main.o game.o board.o results.o $(TARGET)$(EXE)
+	rm -rf $(BUILD_DIR) $(TARGET)
+
+.PHONY: all clean

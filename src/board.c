@@ -2,39 +2,73 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "board.h"
-#include "game.h"
+#include "../include/board.h"
+#include "../include/game.h"
 
 //Funkcja ustawiająca poziom trudności
 Difficulty choose_difficulty() {
     int lvl;
-    Difficulty level;
-    printf("Prosze wybrac poziom trudnosci:\n 1 - Latwy\n2 - Sredni\n3 - Trudny\n4 - Wlasna plansza\n");
-    scanf("%d", &lvl);
-    if(lvl == 1) {
-        level.r = 9;        //Liczba wierszy
-        level.c = 9;        //Liczba kolumn
-        level.mines = 10;       //Liczby min
-        level.multiplier = 1;       //Mnożnik
-    }else if(lvl == 2) {
-        level.r = 16;
-        level.c = 16;
-        level.mines = 40;
-        level.multiplier = 2;
-    }else if(lvl == 3) {
-        level.r = 16;
-        level.c = 30;
-        level.mines = 99;
-        level.multiplier = 3;
-    }else if(lvl == 4) {
-        printf("Podaj liczbe wierszy: ");
-        scanf("%d", &level.r);
-        printf("Podaj liczbe kolumn: ");
-        scanf("%d", &level.c);
-        printf("Podaj liczbe min: ");
-        scanf("%d", &level.mines);
-        level.multiplier = 1;
+    Difficulty level = {0}; // zerowanie pól
+
+    printf("Proszę wybrać poziom trudności:\n");
+    printf("1 - Łatwy\n2 - Średni\n3 - Trudny\n4 - Własna plansza\n");
+
+    if (scanf("%d", &lvl) != 1) {
+        printf("Błędny wybór. Ustawiam poziom Łatwy.\n");
+        lvl = 1;
     }
+
+    switch (lvl) {
+        case 1: // Łatwy
+            level.r = 9;
+            level.c = 9;
+            level.mines = 10;
+            level.multiplier = 1;
+            break;
+
+        case 2: // Średni
+            level.r = 16;
+            level.c = 16;
+            level.mines = 40;
+            level.multiplier = 2;
+            break;
+
+        case 3: // Trudny
+            level.r = 16;
+            level.c = 30;
+            level.mines = 99;
+            level.multiplier = 3;
+            break;
+
+        case 4: // Własna plansza
+            printf("Podaj liczbę wierszy: ");
+            scanf("%d", &level.r);
+            printf("Podaj liczbę kolumn: ");
+            scanf("%d", &level.c);
+            printf("Podaj liczbę min: ");
+            scanf("%d", &level.mines);
+
+            if (level.r <= 0 || level.c <= 0 || level.mines <= 0 || 
+                level.mines >= level.r * level.c) {
+                printf("Błędne dane. Ustawiam poziom Łatwy.\n");
+                level.r = 9;
+                level.c = 9;
+                level.mines = 10;
+                level.multiplier = 1;
+            } else {
+                level.multiplier = 1;
+            }
+            break;
+
+        default: // Każdy inny wybór
+            printf("Niepoprawny wybór. Ustawiam poziom Łatwy.\n");
+            level.r = 9;
+            level.c = 9;
+            level.mines = 10;
+            level.multiplier = 1;
+            break;
+    }
+
     return level;
 }
 
@@ -152,14 +186,14 @@ void print_board(Field **board, int r, int c, int points, int flags, int isfinis
         printf("+---");
     }
     printf("+\n");
-    printf("\nTwoj wynik: %d        Pozostale flagi: %d\n", points, flags);
+    printf("\nTwój wynik: %d        Pozostałe flagi: %d\n", points, flags);
 }
 
 //Funkcja wczytująca planszę z pliku
 Field **load_board(const char *filename, int *r, int *c, int *mines) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        fprintf(stderr, "Nie udalo sie otworzyc pliku %s\n", filename);
+        fprintf(stderr, "Nie udało się otworzyć pliku %s\n", filename);
         return NULL;
     }
 

@@ -1,21 +1,6 @@
 #include <stdio.h>
-
-#ifdef _WIN32
-    #include <windows.h>
-#else
-    #include <unistd.h>
-#endif
-
-#include "board.h"
-
-//Funkcja czekania
-void w(int sec) {
-#ifdef _WIN32
-    Sleep(sec * 1000);
-#else
-    sleep(sec);
-#endif
-}
+#include <unistd.h>
+#include "../include/board.h"
 
 //Funkcja sprawdzająca czy wszystkie pola (niebędące minami) zostały odsłonięte
 int are_all_read(Field **board, int r, int c) {
@@ -96,12 +81,12 @@ int execute_commands(Field **board, int r, int c, int mines, int *points, int mu
                     }
                 }
             }else{
-                printf("Niepoprawna komenda! Dopuszczalne sa: f <x> <y> lub r <x> <y>\n");
-                w(2);
+                printf("Niepoprawna komenda! Dopuszczalne są: f <x> <y> lub r <x> <y>\n");
+                sleep(2);
             }
         }else{
-            printf("Wspolrzedne poza plansza!\n");
-            w(2);
+            printf("Wspłórzędne poza planszą!\n");
+            sleep(2);
         }
         clear();
         print_board(board, r, c, *points * multiplier, flags, 0);
@@ -114,7 +99,7 @@ int execute_commands(Field **board, int r, int c, int mines, int *points, int mu
 void execute_commands_from_file(const char *filename, Field **board, int r, int c, int *points, int flags) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
-        fprintf(stderr, "Nie udalo sie otworzyc pliku z komendami.\n");
+        fprintf(stderr, "Nie udało się otworzyć pliku z komendami.\n");
         return;
     }
 
@@ -135,7 +120,7 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
 
     //Odczytywanie komend
     while (fscanf(file, " %c %d %d", &com, &x, &y) == 3) {
-        w(1);
+        sleep(1);
         if(x-1 >= 0 && y-1 >= 0 && x <= r && y <= c) {
             if(com == 'f') {
                 if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isread == 0 && flags > 0) {
@@ -149,19 +134,19 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
                 if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isbomb == 1) {
                     clear();
                     print_board(board, r, c, *points, flags, 1);
-                    printf("Porazka! Trafiono na mine! Liczba poprawnych krokow: %d\n", steps);
+                    printf("Porażka! Trafiono na minę! Liczba poprawnych kroków: %d\n", steps);
                     return;
                 }else if(board[x-1][y-1].isread == 0 && board[x-1][y-1].isflag == 0) {
                     steps++;
                     read_fields(board, r, c, x-1, y-1, 1, points);
                 }
             }else{
-                printf("Niepoprawna komenda! Dopuszczalne sa: f <x> <y> lub r <x> <y>\n");
-                w(2);
+                printf("Niepoprawna komenda! Dopuszczalne są: f <x> <y> lub r <x> <y>\n");
+                sleep(2);
             }
         }else{
-            printf("Wspolrzedne poza plansza!\n");
-            w(2);
+            printf("Wspłórzędne poza planszą!\n");
+            sleep(2);
         }
         clear();
         print_board(board, r, c, *points, flags, 0);
@@ -172,6 +157,6 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
     if(are_all_read(board, r, c) == 1) {
         clear();
         print_board(board, r, c, *points, flags, 1);
-        printf("Wygrana! Liczba poprawnych krokow: %d\n", steps);
+        printf("Wygrana! Liczba poprawnych kroków: %d\n", steps);
     }
 }

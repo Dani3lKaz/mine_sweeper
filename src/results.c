@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "results.h"
+#include "../include/results.h"
 
 //Funkcja porównująca wyniki (do qsort)
 int compare_results(const void *a, const void *b){
@@ -54,7 +54,7 @@ void add_new_result(Player players[], int *count, const char *name, int points) 
 void save_result(const char *filename, Player players[], int count) {
     FILE *player_list = fopen(filename, "w");
     if(player_list == NULL) {
-        printf("Nie udalo sie otworzyc pliku do zapisu!\n");
+        printf("Nie udało się otworzyć pliku do zapisu!\n");
         return;
     }
     

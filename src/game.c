@@ -1,9 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include "../include/board.h"
 
 //Funkcja sprawdzająca czy wszystkie pola (niebędące minami) zostały odsłonięte
-int are_all_read(Field **board, int r, int c) {
+int all_fields_read(Field **board, int r, int c) {
     int i;
     int j;
     for(i = 0; i < r; i++) {
@@ -50,10 +51,11 @@ int execute_commands(Field **board, int r, int c, int mines, int *points, int mu
     int y;
     int flags = mines;
 
-    clear();
+    system("clear");
     print_board(board, r, c, *points, flags, 0);
 
-    while(are_all_read(board, r, c) == 0) {
+    while(all_fields_read
+    (board, r, c) == 0) {
         //Pobranie komendy od użytkownika i wykonanie odpowiedniej operacji
         scanf(" %c %d %d", &com, &x, &y);
         
@@ -88,7 +90,7 @@ int execute_commands(Field **board, int r, int c, int mines, int *points, int mu
             printf("Wspłórzędne poza planszą!\n");
             sleep(2);
         }
-        clear();
+        system("clear");
         print_board(board, r, c, *points * multiplier, flags, 0);
     }
     print_board(board, r, c, *points * multiplier, flags, 1);
@@ -132,7 +134,7 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
                 }
             }else if(com == 'r') {
                 if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isbomb == 1) {
-                    clear();
+                    system("clear");
                     print_board(board, r, c, *points, flags, 1);
                     printf("Porażka! Trafiono na minę! Liczba poprawnych kroków: %d\n", steps);
                     return;
@@ -148,14 +150,15 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
             printf("Wspłórzędne poza planszą!\n");
             sleep(2);
         }
-        clear();
+        system("clear");
         print_board(board, r, c, *points, flags, 0);
     }
     
     fclose(file);
 
-    if(are_all_read(board, r, c) == 1) {
-        clear();
+    if(all_fields_read
+    (board, r, c) == 1) {
+        system("clear");
         print_board(board, r, c, *points, flags, 1);
         printf("Wygrana! Liczba poprawnych kroków: %d\n", steps);
     }

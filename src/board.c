@@ -261,11 +261,3 @@ void free_board(Field **board, int r){
     free(board);
 }
 
-void clear() {
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
-}
-

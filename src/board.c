@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <stdbool.h>
 #include "../include/board.h"
 #include "../include/game.h"
 
-//Funkcja ustawiająca poziom trudności
 Difficulty choose_difficulty() {
     int lvl;
-    Difficulty level = {0}; // zerowanie pól
+    Difficulty level = {0};
 
     printf("Proszę wybrać poziom trudności:\n");
     printf("1 - Łatwy\n2 - Średni\n3 - Trudny\n4 - Własna plansza\n");
@@ -19,28 +19,28 @@ Difficulty choose_difficulty() {
     }
 
     switch (lvl) {
-        case 1: // Łatwy
+        case 1:
             level.r = 9;
             level.c = 9;
             level.mines = 10;
             level.multiplier = 1;
             break;
 
-        case 2: // Średni
+        case 2:
             level.r = 16;
             level.c = 16;
             level.mines = 40;
             level.multiplier = 2;
             break;
 
-        case 3: // Trudny
+        case 3:
             level.r = 16;
             level.c = 30;
             level.mines = 99;
             level.multiplier = 3;
             break;
 
-        case 4: // Własna plansza
+        case 4:
             printf("Podaj liczbę wierszy: ");
             scanf("%d", &level.r);
             printf("Podaj liczbę kolumn: ");
@@ -60,7 +60,7 @@ Difficulty choose_difficulty() {
             }
             break;
 
-        default: // Każdy inny wybór
+        default:
             printf("Niepoprawny wybór. Ustawiam poziom Łatwy.\n");
             level.r = 9;
             level.c = 9;
@@ -72,7 +72,6 @@ Difficulty choose_difficulty() {
     return level;
 }
 
-//Funkcja generująca planszę (bez min)
 Field **generate_board(int r, int c) {
     Field **board;
     board = malloc(r * sizeof(Field*));
@@ -91,7 +90,6 @@ Field **generate_board(int r, int c) {
     return board;
 }
 
-//Funkcja generująca miny na planszy
 void generate_mines(Field **board, int r, int c, int mines, int start_x, int start_y) {
     int i;
     int j;
@@ -104,32 +102,31 @@ void generate_mines(Field **board, int r, int c, int mines, int start_x, int sta
             count++;
         }
     }
-    //Ustawienie odpowiednich nr komórek informujących o liczbie sąsiadujących min
     for(i = 0; i < r; i++) {
         for(j = 0; j < c; j++) {
             if(board[i][j].isbomb != 1) {
-                if(i-1 >= 0 && j-1 >= 0 && board[i-1][j-1].isbomb == 1) {
+                if(i-1 >= 0 && j-1 >= 0 && board[i-1][j-1].isbomb) {
                     board[i][j].number++;
                 }
                 if(j-1 >= 0 && board[i][j-1].isbomb == 1) {
                     board[i][j].number++;
                 }
-                if(i+1 < r && j-1 >= 0 && board[i+1][j-1].isbomb == 1) {
+                if(i+1 < r && j-1 >= 0 && board[i+1][j-1].isbomb) {
                     board[i][j].number++;
                 }
                 if(i+1 < r && board[i+1][j].isbomb == 1) {
                     board[i][j].number++;
                 }
-                if(i+1 < r && j+1 < c && board[i+1][j+1].isbomb == 1) {
+                if(i+1 < r && j+1 < c && board[i+1][j+1].isbomb) {
                     board[i][j].number++;
                 }
-                if(j+1 < c && board[i][j+1].isbomb == 1) {
+                if(j+1 < c && board[i][j+1].isbomb) {
                     board[i][j].number++;
                 }
-                if(i-1 >= 0 && j+1 < c && board[i-1][j+1].isbomb == 1) {
+                if(i-1 >= 0 && j+1 < c && board[i-1][j+1].isbomb) {
                     board[i][j].number++;
                 }
-                if(i-1 >= 0 && board[i-1][j].isbomb == 1) {
+                if(i-1 >= 0 && board[i-1][j].isbomb) {
                     board[i][j].number++;
                 }
             }
@@ -137,9 +134,7 @@ void generate_mines(Field **board, int r, int c, int mines, int start_x, int sta
     }
 }
 
-//Funkcja drukująca planszę
-//isfinished określa czy ma zostać wyświetlona plansza na zakończenie gry (z zaznaczonymi bombami) czy też nie
-void print_board(Field **board, int r, int c, int points, int flags, int isfinished) {
+void print_board(Field **board, int r, int c, int points, int flags, bool isfinished) {
     int i;
     int j;
     printf("    ");
@@ -154,13 +149,13 @@ void print_board(Field **board, int r, int c, int points, int flags, int isfinis
         printf("+\n");
         printf(" %2d ", i + 1);
         for(j = 0; j < c; j++) {
-            if(board[i][j].isbomb == 1 && isfinished == 1){
+            if(board[i][j].isbomb && isfinished){
                 printf("|\e[0;31m * \e[0m");
-            }else if(board[i][j].isread == 1 && isfinished == 0) {
+            }else if(board[i][j].isread && !isfinished) {
                 if(board[i][j].number == 0) {
                     printf("|   ");
                 }else{
-                    //Wyświetlanie liczb w odpowiednich kolorach
+                    
                     printf("| \e[%sm%d\e[0m ", 
                         board[i][j].number == 1 ? "0;34" : 
                         board[i][j].number == 2 ? "0;32" : 
@@ -172,9 +167,9 @@ void print_board(Field **board, int r, int c, int points, int flags, int isfinis
                         "0;37",
                         board[i][j].number);
                 }
-            }else if(board[i][j].isflag == 1) {
+            }else if(board[i][j].isflag) {
                 printf("|\e[0;31m F \e[0m");
-            }else if(board[i][j].isread == 0 && isfinished == 0) {
+            }else if(!board[i][j].isread && !isfinished) {
                 printf("|###");
             }else{
                 printf("|   ");
@@ -189,7 +184,7 @@ void print_board(Field **board, int r, int c, int points, int flags, int isfinis
     printf("\nTwój wynik: %d        Pozostałe flagi: %d\n", points, flags);
 }
 
-//Funkcja wczytująca planszę z pliku
+
 Field **load_board(const char *filename, int *r, int *c, int *mines) {
     FILE *file = fopen(filename, "r");
     if (!file) {
@@ -199,7 +194,7 @@ Field **load_board(const char *filename, int *r, int *c, int *mines) {
 
     char ch;
     int temp_c = 0;
-    //Pierwsza pętla while liczy liczbę wierszy, kolumn i min
+
     while ((ch = getc(file)) != EOF) {
         if (ch == '*') {
             (*mines)++;
@@ -227,7 +222,7 @@ Field **load_board(const char *filename, int *r, int *c, int *mines) {
 
     int row = 0;
     int col = 0;
-    //Druga pętla while ustawia w polach planszy miny oraz odpowiednie numery
+    
     while ((ch = getc(file)) != EOF) {
         if (ch == '*') {
             board[row][col].isbomb = 1;
@@ -251,8 +246,6 @@ Field **load_board(const char *filename, int *r, int *c, int *mines) {
     return board;
 }
 
-
-//Zwalnianie pamięci
 void free_board(Field **board, int r){
     int i;
     for(i = 0; i < r; i++) {

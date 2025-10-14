@@ -1,7 +1,6 @@
 #ifndef _RESULTS_H
 #define _RESULTS_H
 
-//Struktura zawierająca dane gracza
 typedef struct {
     char name[50];
     int points;

@@ -1,35 +1,34 @@
-# Nazwa programu
 TARGET = Minesweeper
+TEST_TARGET = test
 
-# Kompilator i flagi
 CC = gcc
-CFLAGS = -Wall -Iinclude
+CFLAGS = -Wall -Wextra -g -Iinclude
 
-# Katalogi
 SRC_DIR = src
+TEST_DIR = tests
 BUILD_DIR = build
 
-# Pliki źródłowe i obiektowe
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC))
 
-# Domyślny cel
 all: $(TARGET)
 
-# Linkowanie
 $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# Kompilacja plików .c do .o (pattern rule)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Tworzenie katalogu build (jeśli nie istnieje)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-# Czyszczenie
+$(TEST_TARGET): $(BUILD_DIR)/test.o build/board.o build/game.o build/results.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(BUILD_DIR)/test.o: $(TEST_DIR)/test.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_TARGET)
 
 .PHONY: all clean

@@ -1,37 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "../include/board.h"
 
-//Funkcja sprawdzająca czy wszystkie pola (niebędące minami) zostały odsłonięte
-int all_fields_read(Field **board, int r, int c) {
+bool all_fields_read(Field **board, int r, int c) {
     int i;
     int j;
     for(i = 0; i < r; i++) {
         for(j = 0; j < c; j++) {
-            if(board[i][j].isbomb == 0 && board[i][j].isread == 0) {
-                return 0;
+            if(!board[i][j].isbomb && !board[i][j].isread) {
+                return false;
             } 
         }
     }
-    return 1;
+    return true;
 }
 
-//Funkcja odsłaniająca wybrane pole oraz wszystkie sąsiadujące z nią jeżeli jej nr to 0
-//mode oznacza tryb w jakim jest uruchamiana funkcja (0 - dla pierwszego polecenia, 1 - dla wszystkich pozostałych)
 void read_fields(Field **board, int r, int c, int x, int y, int mode, int *points) {
     if(x < 0 || x >= r || y < 0 || y >= c) {
         return;
     }
 
-    if(board[x][y].isread == 1 || board[x][y].isbomb == 1){
+    if(board[x][y].isread || board[x][y].isbomb){
         return;
     }
-    //Odczytanie pola
+
     board[x][y].isread = 1;
     (*points)++;
 
-    //Rekurencyjne odsłanianie kolejnych pól
     if (board[x][y].number == 0 || mode == 0) {
         read_fields(board, r, c, x - 1, y - 1, 1, points);  
         read_fields(board, r, c, x - 1, y, 1, points);      
@@ -44,7 +41,6 @@ void read_fields(Field **board, int r, int c, int x, int y, int mode, int *point
     }
 }
 
-//Wykonywanie komend - dla programu obsługiwanego przez użytkownika
 int execute_commands(Field **board, int r, int c, int mines, int *points, int multiplier) {
     char com;
     int x;
@@ -56,12 +52,11 @@ int execute_commands(Field **board, int r, int c, int mines, int *points, int mu
 
     while(all_fields_read
     (board, r, c) == 0) {
-        //Pobranie komendy od użytkownika i wykonanie odpowiedniej operacji
         scanf(" %c %d %d", &com, &x, &y);
         
         if(x-1 >= 0 && y-1 >= 0 && x <= r && y <= c) {
             if(com == 'f') {
-                if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isread == 0 && flags > 0) {
+                if(!board[x-1][y-1].isflag && !board[x-1][y-1].isread && flags > 0) {
                     board[x-1][y-1].isflag = 1;
                     flags--;
                 }else if(board[x-1][y-1].isflag == 1){
@@ -70,15 +65,13 @@ int execute_commands(Field **board, int r, int c, int mines, int *points, int mu
                 }
             }else if(com == 'r') {
                 if(*points == 0){
-                    //Wygenerowanie min po pierwszym odczycie
                     generate_mines(board, r, c, mines, x-1, y-1);
                     read_fields(board, r, c, x-1, y-1, 0, points);
                 }else{
-                    if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isbomb == 1) {
-                        //Wyświetlenie planszy z bombami w przypadku porażki
+                    if(!board[x-1][y-1].isflag && board[x-1][y-1].isbomb) {
                         print_board(board, r, c, *points * multiplier, flags, 1);
                         return 0;
-                    }else if(board[x-1][y-1].isread == 0 && board[x-1][y-1].isflag == 0) {
+                    }else if(!board[x-1][y-1].isread && !board[x-1][y-1].isflag) {
                         read_fields(board, r, c, x-1, y-1, 1, points);
                     }
                 }
@@ -97,7 +90,6 @@ int execute_commands(Field **board, int r, int c, int mines, int *points, int mu
     return 1;
 }
 
-//Wykonywanie komend czytanych z pliku - gdy program został uruchomiony z flagą -f
 void execute_commands_from_file(const char *filename, Field **board, int r, int c, int *points, int flags) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -111,7 +103,6 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
     int steps = 0;
     char ch;
     
-    //Przesunięcie kursora do miejsca z komendami
     while ((ch = getc(file)) != EOF) {
         if (ch == 'r' || ch == 'f') {
             break;
@@ -120,25 +111,24 @@ void execute_commands_from_file(const char *filename, Field **board, int r, int 
 
     fseek(file, -1, SEEK_CUR);
 
-    //Odczytywanie komend
     while (fscanf(file, " %c %d %d", &com, &x, &y) == 3) {
         sleep(1);
         if(x-1 >= 0 && y-1 >= 0 && x <= r && y <= c) {
             if(com == 'f') {
-                if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isread == 0 && flags > 0) {
+                if(!board[x-1][y-1].isflag && !board[x-1][y-1].isread && flags > 0) {
                     board[x-1][y-1].isflag = 1;
                     flags--;
-                }else if(board[x-1][y-1].isflag == 1){
+                }else if(board[x-1][y-1].isflag){
                     board[x-1][y-1].isflag = 0;
                     flags++;
                 }
             }else if(com == 'r') {
-                if(board[x-1][y-1].isflag == 0 && board[x-1][y-1].isbomb == 1) {
+                if(!board[x-1][y-1].isflag && board[x-1][y-1].isbomb) {
                     system("clear");
                     print_board(board, r, c, *points, flags, 1);
                     printf("Porażka! Trafiono na minę! Liczba poprawnych kroków: %d\n", steps);
                     return;
-                }else if(board[x-1][y-1].isread == 0 && board[x-1][y-1].isflag == 0) {
+                }else if(!board[x-1][y-1].isread && !board[x-1][y-1].isflag) {
                     steps++;
                     read_fields(board, r, c, x-1, y-1, 1, points);
                 }
